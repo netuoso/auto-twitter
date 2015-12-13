@@ -8,10 +8,10 @@
  - `bundle install`
 3. [Get your API keys](https://apps.twitter.com)
 4. Setup your environment variables:
- - `export TWITTER_CONSUMER_KEY = '{{CONSUMER_KEY_HERE}}'
- - `export TWITTER_CONSUMER_SECRET = '{{CONSUMER_SECRET_HERE}}'
- - `export TWITTER_ACCESS_TOKEN = '{{ACCESS_TOKEN_HERE}}'
- - `export TWITTER_ACCESS_SECRET = '{{ACCESS_SECRET_HERE}}'
+ - `export TWITTER_CONSUMER_KEY = '{{CONSUMER_KEY_HERE}}'`
+ - `export TWITTER_CONSUMER_SECRET = '{{CONSUMER_SECRET_HERE}}'`
+ - `export TWITTER_ACCESS_TOKEN = '{{ACCESS_TOKEN_HERE}}'`
+ - `export TWITTER_ACCESS_SECRET = '{{ACCESS_SECRET_HERE}}'`
 5. Test to make sure your setup works
  - `./auto-twitter.rb -a dev`
  - `rest_client.current_user.name`
