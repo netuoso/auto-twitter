@@ -82,7 +82,7 @@ class TwitterStatus
 
   def search(query, type='')
     case type
-    when ''
+    when nil
       rest_client.search("-RT lang:en #{query}").attrs[:statuses]
     else
       rest_client.search("-RT lang:en filter:#{type} #{query}").attrs[:statuses]
