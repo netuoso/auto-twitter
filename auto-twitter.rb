@@ -100,7 +100,7 @@ class TwitterStatus
     end
     tweets = search(topics.sample, type)
     tweet(tweets.first[:text]) if tweets.first
-    sleep(rand(600..1800))
+    sleep(rand(900..1800))
     auto_tweet(type)
   end
 
@@ -118,7 +118,7 @@ class TwitterStatus
     tweet_count = 0
     last_post = Time.now
     streaming_client.filter(track: topics.join(',')) do |obj|
-      if obj.is_a?(Twitter::Tweet) && Time.now >= (last_post + rand(600..1800))
+      if obj.is_a?(Twitter::Tweet) && Time.now >= (last_post + rand(900..1800))
         rest_client.update(obj.text[0..139])
         tweet_count += 1
         puts "Tweet ##{tweet_count}: #{obj.text}" unless options[:background] == 'true'
