@@ -22,6 +22,7 @@ class TwitterStatus
       opt.on('-a', '--require ACTION', 'Action: [required] (String)') { |o| @options[:action] = o }
       opt.on('-d', '--data DATA', 'Data: [optional] (String)') { |o| @options[:data] = o }
       opt.on('-b', '--background BOOLEAN', 'Background: [optional] (Boolean)') { |o| @options[:background] = o }
+      opt.on('-t', '--type TYPE', 'Type: [optional] (String)') { |o| @options[:type] = o }
     end.parse!
 
     @rest_client = Twitter::REST::Client.new do |config|
@@ -45,14 +46,25 @@ class TwitterStatus
       p "Debug: #{__FILE__} -a dev"
     else
       case options[:action]
+      when 'auto'
+        if options[:background] == 'true'
+          pid = Process.fork { auto_tweet(options[:type]) }
+          write_pid(pid)
+        else
+          auto_tweet(options[:type])
+        end
       when 'tweet'
         raise 'data required when tweeting' unless options[:data]
         tweet(options[:data])
         p "Successfully tweeted #{options[:data].chars.count} characters."
       when 'stream'
-        raise 'Process file exists. Is the script already running? If not, delete the twitter-status.pid file and rerun' if File.exists?('twitter-status.pid')
-        pid = Process.fork { stream }
-        write_pid(pid)
+        raise 'Process file exists. Is the script already running? If not, delete the auto-twitter.pid file and rerun' if File.exists?('auto-twitter.pid')
+        if options[:background] == 'true'
+          pid = Process.fork { stream }
+          write_pid(pid)
+        else
+          stream
+        end
       when 'dev'
         # This method is for debugging and testing
         binding.pry
@@ -66,6 +78,30 @@ class TwitterStatus
 
   def tweet(data)
     rest_client.update(data)
+  end
+
+  def search(query, type='')
+    case type
+    when ''
+      rest_client.search("-RT lang:en #{query}").attrs[:statuses]
+    else
+      rest_client.search("-RT lang:en filter:#{type} #{query}").attrs[:statuses]
+    end
+  end
+
+  def auto_tweet(type='')
+    topics = ["bitcoin", "hacking", "infosec", "security", "breaking news", "cybersecurity", "satoshi nakomoto", "financial tech",
+              "defcon", "defcon parties", "hacking ctf", "new orleans tech", "silicon bayou", "technology", "fintech", "litecoin",
+              "world news", "shocking", "computer virus", "malware", "adware", "ransomware", "crypto wall", "federal bureau", "techflavor com",
+              "greyhatpro com", "nsa gov", "fbi gov"]
+    trend_location = rest_client.trends_closest(lat:40.7053094,long:-74.2588796).first.id
+    rest_client.trends(trend_location).to_a.each do |trend|
+      topics << trend.name
+    end
+    tweets = search(topics.sample, type)
+    tweet(tweets.first[:text]) if tweets.first
+    sleep(rand(600..1800))
+    auto_tweet(type)
   end
 
   def stream
