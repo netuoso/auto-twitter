@@ -81,12 +81,7 @@ class TwitterStatus
   end
 
   def search(query, type='')
-    case type
-    when nil
-      rest_client.search("-RT lang:en #{query}").attrs[:statuses]
-    else
-      rest_client.search("-RT lang:en filter:#{type} #{query}").attrs[:statuses]
-    end
+    rest_client.search("-RT lang:en min_retweets:5 #{query} #{type.nil? ? '' : 'filter:' + type}").attrs[:statuses]
   end
 
   def auto_tweet(type='')
@@ -99,7 +94,7 @@ class TwitterStatus
       topics << trend.name
     end
     tweets = search(topics.sample, type)
-    tweet(tweets.first[:text]) if tweets.first
+    tweet(tweets.first[:text][0..139]) if tweets.first
     sleep(rand(900..1800))
     auto_tweet(type)
   end
